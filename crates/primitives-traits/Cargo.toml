@@ -21,7 +21,7 @@ alloy-eips.workspace = true
 alloy-genesis.workspace = true
 alloy-primitives.workspace = true
 alloy-rlp.workspace = true
-revm-primitives.workspace = true
+revm-primitives = { workspace = true, default-features = false }
 
 # misc
 byteorder = { workspace = true, optional = true }
