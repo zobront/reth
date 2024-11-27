@@ -27,7 +27,7 @@ revm-primitives.workspace = true
 byteorder = { workspace = true, optional = true }
 bytes.workspace = true
 derive_more.workspace = true
-roaring = "0.10.2"
+roaring = { version = "0.10.2", optional = true }
 serde_with = { workspace = true, optional = true }
 auto_impl.workspace = true
 
@@ -61,7 +61,8 @@ std = [
 	"alloy-genesis/std",
 	"alloy-primitives/std",
 	"revm-primitives/std",
-	"serde?/std"
+	"serde?/std",
+    "dep:roaring"
 ]
 test-utils = [
 	"arbitrary",
