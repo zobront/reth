@@ -23,6 +23,8 @@ use once_cell::sync::{Lazy as LazyLock, OnceCell as OnceLock};
 use op_alloy_consensus::DepositTransaction;
 #[cfg(feature = "optimism")]
 use op_alloy_consensus::TxDeposit;
+#[cfg(feature = "optimism")]
+use revm_primitives::{OptimismFields, TransactTo};
 use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use reth_primitives_traits::{InMemorySize, SignedTransaction};
 use revm_primitives::{AuthorizationList, TxEnv};
@@ -1367,7 +1369,31 @@ impl reth_primitives_traits::FillTxEnv for TransactionSigned {
                     Some(AuthorizationList::Signed(tx.authorization_list.clone()));
             }
             #[cfg(feature = "optimism")]
-            Transaction::Deposit(_) => {}
+            Transaction::Deposit(tx) => {
+                tx_env.caller = tx.from;
+                tx_env.access_list.clear();
+                tx_env.gas_limit = tx.gas_limit;
+                tx_env.gas_price = U256::from(0);
+                tx_env.gas_priority_fee = None;
+                match tx.to {
+                    TxKind::Call(to) => tx_env.transact_to = TransactTo::Call(to),
+                    TxKind::Create => tx_env.transact_to = TransactTo::Create,
+                }
+                tx_env.value = tx.value;
+                tx_env.data = tx.input.clone();
+                tx_env.chain_id = None;
+                tx_env.nonce = None;
+                tx_env.optimism = OptimismFields {
+                    source_hash: Some(tx.source_hash),
+                    mint: tx.mint,
+                    is_system_transaction: Some(tx.is_system_transaction),
+                    enveloped_tx: {
+                        let mut buf = Vec::new();
+                        tx.encode_2718(&mut buf);
+                        Some(Bytes::copy_from_slice(&buf))
+                    }
+                }
+            }
         }
     }
 }
