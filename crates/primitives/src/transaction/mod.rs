@@ -1389,7 +1389,7 @@ impl reth_primitives_traits::FillTxEnv for TransactionSigned {
                     is_system_transaction: Some(tx.is_system_transaction),
                     enveloped_tx: {
                         let mut buf = Vec::new();
-                        tx.encode_2718(&mut buf);
+                        tx.encode(&mut buf);
                         Some(Bytes::copy_from_slice(&buf))
                     }
                 }
